@@ -1,0 +1,20 @@
+<% @body_id = 'login' %>
+<div class="col-md-6 <%= request.path == spree.login_path ? "col-md-offset-3" : "" %>">
+  <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><%= I18n.t("spree.login_as_existing") %></h3>
+    </div>
+      <div id="existing-customer" class="panel-body" data-hook="login">
+          <% if flash[:alert] %>
+            <div class="alert alert-danger"><%= flash[:alert] %></div>
+          <% end %>
+          <%= render :partial => 'spree/shared/login' %>
+          <div class="text-center">
+            <%= I18n.t("spree.or") %>
+                <%= link_to I18n.t("spree.create_a_new_account"), spree.signup_path %> |
+                <%= link_to I18n.t("spree.forgot_password"), spree.recover_password_path %>
+          </div>
+          <div data-hook="login_extras"></div>
+      </div>
+  </div>
+</div>
