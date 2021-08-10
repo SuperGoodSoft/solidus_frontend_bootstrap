@@ -1,54 +1,53 @@
-require 'spec_helper'
+require "spec_helper"
 
 RSpec.describe "Coupon code promotions", type: :feature, js: true do
-  let!(:country) { create(:country, :name => "United States of America", :states_required => true) }
-  let!(:state) { create(:state, :name => "Alabama", :country => country) }
+  let!(:country) { create(:country, name: "United States of America", states_required: true) }
+  let!(:state) { create(:state, name: "Alabama", country: country) }
   let!(:zone) { create(:zone) }
   let!(:shipping_method) { create(:shipping_method) }
   let!(:payment_method) { create(:check_payment_method) }
-  let!(:product) { create(:product, :name => "RoR Mug", :price => 20) }
+  let!(:product) { create(:product, name: "RoR Mug", price: 20) }
   let!(:store) { create(:store) }
 
   context "visitor makes checkout as guest without registration" do
     def create_basic_coupon_promotion(code)
       promotion = create(
         :promotion,
-        name:       code.titleize,
-        code:       code,
-        starts_at:  1.day.ago,
+        name: code.titleize,
+        code: code,
+        starts_at: 1.day.ago,
         expires_at: 1.day.from_now
       )
 
-     calculator = Spree::Calculator::FlatRate.new
-     calculator.preferred_amount = 10
+      calculator = Spree::Calculator::FlatRate.new
+      calculator.preferred_amount = 10
 
-     action = Spree::Promotion::Actions::CreateItemAdjustments.new
-     action.calculator = calculator
-     action.promotion = promotion
-     action.save
+      action = Spree::Promotion::Actions::CreateItemAdjustments.new
+      action.calculator = calculator
+      action.promotion = promotion
+      action.save
 
-     promotion.reload # so that promotion.actions is available
-   end
+      promotion.reload # so that promotion.actions is available
+    end
 
     let!(:promotion) { create_basic_coupon_promotion("onetwo") }
 
     # OrdersController
     context "on the payment page" do
       before do
-
         visit spree.root_path
         click_link "RoR Mug"
         click_button "add-to-cart-button"
         click_button "Checkout"
-        fill_in "order_email", :with => "spree@example.com"
+        fill_in "order_email", with: "spree@example.com"
         click_button "Continue"
-        fill_in "Name", :with => "John Smith"
-        fill_in "Street Address", :with => "1 John Street"
-        fill_in "City", :with => "City of John"
-        fill_in "Zip", :with => "01337"
-        select country.name, :from => "Country"
-        select state.name, :from => "order[bill_address_attributes][state_id]"
-        fill_in "Phone", :with => "555-555-5555"
+        fill_in "Name", with: "John Smith"
+        fill_in "Street Address", with: "1 John Street"
+        fill_in "City", with: "City of John"
+        fill_in "Zip", with: "01337"
+        select country.name, from: "Country"
+        select state.name, from: "order[bill_address_attributes][state_id]"
+        fill_in "Phone", with: "555-555-5555"
 
         # To shipping method screen
         click_button "Save and Continue"
@@ -57,23 +56,23 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
       end
 
       it "informs about an invalid coupon code" do
-        fill_in "order_coupon_code", :with => "coupon_codes_rule_man"
+        fill_in "order_coupon_code", with: "coupon_codes_rule_man"
         click_button "Apply Code"
         expect(page).to have_content(I18n.t("spree.coupon_code_not_found"))
       end
 
       it "can enter an invalid coupon code, then a real one" do
-        fill_in "order_coupon_code", :with => "coupon_codes_rule_man"
+        fill_in "order_coupon_code", with: "coupon_codes_rule_man"
         click_button "Apply Code"
         expect(page).to have_content(I18n.t("spree.coupon_code_not_found"))
-        fill_in "order_coupon_code", :with => "onetwo"
+        fill_in "order_coupon_code", with: "onetwo"
         click_button "Apply Code"
         expect(page).to have_content("Promotion (Onetwo) -$10.00", normalize_ws: true)
       end
 
       context "with a promotion" do
         it "applies a promotion to an order" do
-          fill_in "order_coupon_code", :with => "onetwo"
+          fill_in "order_coupon_code", with: "onetwo"
           click_button "Apply Code"
           expect(page).to have_content("Promotion (Onetwo) -$10.00", normalize_ws: true)
         end
@@ -82,7 +81,6 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
 
     # CheckoutController
     context "on the cart page" do
-
       before do
         visit spree.root_path
         click_link "RoR Mug"
@@ -90,13 +88,13 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
       end
 
       it "can enter a coupon code and receives success notification" do
-        fill_in "coupon_code", :with => "onetwo"
+        fill_in "coupon_code", with: "onetwo"
         click_button "Apply Code"
         expect(page).to have_content(I18n.t("spree.coupon_code_applied"))
       end
 
       it "can enter a promotion code with both upper and lower case letters" do
-        fill_in "coupon_code", :with => "ONETwO"
+        fill_in "coupon_code", with: "ONETwO"
         click_button "Apply Code"
         expect(page).to have_content(I18n.t("spree.coupon_code_applied"))
       end
@@ -106,7 +104,7 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
 
         fill_in "coupon_code", with: "onetwo"
         click_button "Apply Code"
-        expect(page).to have_content(I18n.t('spree.coupon_code_max_usage'))
+        expect(page).to have_content(I18n.t("spree.coupon_code_max_usage"))
       end
 
       context "informs the user if the coupon code is not eligible" do
@@ -120,7 +118,7 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
         specify do
           visit spree.cart_path
 
-          fill_in "coupon_code", :with => "onetwo"
+          fill_in "coupon_code", with: "onetwo"
           click_button "Apply Code"
           expect(page).to have_content(I18n.t("spree.eligibility_errors.messages.item_total_less_than_or_equal", amount: "$100.00"))
         end
@@ -128,9 +126,9 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
 
       it "informs the user if the coupon is expired" do
         promotion.expires_at = Date.today.beginning_of_week
-        promotion.starts_at = Date.today.beginning_of_week.advance(:day => 3)
+        promotion.starts_at = Date.today.beginning_of_week.advance(day: 3)
         promotion.save!
-        fill_in "coupon_code", :with => "onetwo"
+        fill_in "coupon_code", with: "onetwo"
         click_button "Apply Code"
         expect(page).to have_content(I18n.t("spree.coupon_code_expired"))
       end
@@ -151,21 +149,21 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
           click_button "add-to-cart-button"
 
           visit spree.cart_path
-          fill_in "coupon_code", :with => "onetwo"
+          fill_in "coupon_code", with: "onetwo"
           click_button "Apply Code"
 
-          fill_in "order_line_items_attributes_0_quantity", :with => 2
-          fill_in "order_line_items_attributes_1_quantity", :with => 2
+          fill_in "order_line_items_attributes_0_quantity", with: 2
+          fill_in "order_line_items_attributes_1_quantity", with: 2
           click_button "Update"
 
-          within '#cart_adjustments' do
+          within "#cart_adjustments" do
             # 20% of $40 = 8
             # 20% of $20 = 4
             # Therefore: promotion discount amount is $12.
             expect(page).to have_content("Promotion (Onetwo) -$12.00", normalize_ws: true)
           end
 
-          within '.cart-total' do
+          within ".cart-total" do
             expect(page).to have_content("$48.00")
           end
         end
@@ -193,18 +191,18 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
 
           visit spree.cart_path
 
-          within '.cart-total' do
+          within ".cart-total" do
             expect(page).to have_content("$30.00")
           end
 
           fill_in "coupon_code", with: "onetwo"
           click_button "Apply Code"
 
-          within '#cart_adjustments' do
+          within "#cart_adjustments" do
             expect(page).to have_content("Promotion (Onetwo) -$30.00", normalize_ws: true)
           end
 
-          within '.cart-total' do
+          within ".cart-total" do
             expect(page).to have_content("$0.00")
           end
 
@@ -212,11 +210,11 @@ RSpec.describe "Coupon code promotions", type: :feature, js: true do
           fill_in "order_line_items_attributes_1_quantity", with: 2
           click_button "Update"
 
-          within '#cart_adjustments' do
+          within "#cart_adjustments" do
             expect(page).to have_content("Promotion (Onetwo) -$60.00", normalize_ws: true)
           end
 
-          within '.cart-total' do
+          within ".cart-total" do
             expect(page).to have_content("$0.00")
           end
         end

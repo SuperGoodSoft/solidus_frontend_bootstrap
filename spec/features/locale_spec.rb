@@ -1,6 +1,6 @@
-require 'spec_helper'
+require "spec_helper"
 
-describe 'setting locale', type: :feature, js: true do
+describe "setting locale", type: :feature, js: true do
   let!(:store) { create(:store) }
   def with_locale(locale)
     I18n.locale = locale
@@ -10,14 +10,14 @@ describe 'setting locale', type: :feature, js: true do
     I18n.locale = I18n.default_locale
   end
 
-  context 'shopping cart link and page' do
+  context "shopping cart link and page" do
     include_context "fr locale"
 
-    it 'should be in french' do
-      with_locale('fr') do
+    it "should be in french" do
+      with_locale("fr") do
         visit spree.root_path
-        click_link 'Panier'
-        expect(page).to have_content('Panier')
+        click_link "Panier"
+        expect(page).to have_content("Panier")
       end
     end
   end

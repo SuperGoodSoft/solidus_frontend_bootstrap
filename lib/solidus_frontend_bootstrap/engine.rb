@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'solidus_core'
-require 'solidus_support'
+require "solidus_core"
+require "solidus_support"
 
 module SolidusFrontendBootstrap
   class Engine < Rails::Engine
@@ -9,7 +9,7 @@ module SolidusFrontendBootstrap
 
     isolate_namespace ::Spree
 
-    engine_name 'solidus_frontend_bootstrap'
+    engine_name "solidus_frontend_bootstrap"
 
     # use rspec for tests
     config.generators do |g|

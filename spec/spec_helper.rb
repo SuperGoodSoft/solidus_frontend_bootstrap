@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
 # Configure Rails Environment
-ENV['RAILS_ENV'] = 'test'
+ENV["RAILS_ENV"] = "test"
 
 # Run Coverage report
-require 'solidus_dev_support/rspec/coverage'
+require "solidus_dev_support/rspec/coverage"
 
 # Create the dummy app if it's still missing.
 dummy_env = "#{__dir__}/dummy/config/environment.rb"
-system 'bin/rake extension:test_app' unless File.exist? dummy_env
+system "bin/rake extension:test_app" unless File.exist? dummy_env
 require dummy_env
 
 # Requires factories and other useful helpers defined in spree_core.
-require 'solidus_dev_support/rspec/feature_helper'
+require "solidus_dev_support/rspec/feature_helper"
 
-require 'spree/testing_support/caching'
+require "spree/testing_support/caching"
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.
@@ -30,10 +30,10 @@ else
   Capybara.register_driver(:headless_chrome) do |app|
     options = ::Selenium::WebDriver::Chrome::Options.new
 
-    options.add_argument('--headless')
-    options.add_argument('--blink-settings=imagesEnabled=false')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1920,1080')
+    options.add_argument("--headless")
+    options.add_argument("--blink-settings=imagesEnabled=false")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
 
     Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
   end
